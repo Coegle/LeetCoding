@@ -109,6 +109,28 @@ fun longestPalindromeSubseq(s: String): Int {
     }
     return dp[0][n-1]
 }
+// 526. 优美的排列
+fun countArrangement(n: Int): Int {
+    var ans = 0
+    val array = IntArray(n + 1)
+    val vis = IntArray(n + 1)
+
+    return countArrangementDFS(vis, 1, n)
+}
+fun countArrangementDFS(vis: IntArray, deep: Int, n: Int): Int {
+    var ansCountInThisDeep = 0
+    if (deep == n + 1) {
+        return 1
+    }
+    for (i in 1..n) {
+        if (vis[i] == 0 && (i % deep == 0 || deep % i == 0)) {
+            vis[i] = 1
+            ansCountInThisDeep += countArrangementDFS(vis, deep + 1, n)
+            vis[i] = 0
+        }
+    }
+    return ansCountInThisDeep
+}
 fun main () {
     val array = intArrayOf(3)
     val intArray1 = intArrayOf(2,3,7,6)
@@ -116,6 +138,6 @@ fun main () {
     val intList2 = mutableListOf(1, 2, 3)
     val str = "cbbd"
     val arrayIntArray = arrayOf(intArrayOf(1), intArrayOf(0,2,4), intArrayOf(1,3,4), intArrayOf(2), intArrayOf(1,2))
-    val ans = longestPalindromeSubseq(str)
+    val ans = countArrangement(14)
     println(ans)
 }
