@@ -131,6 +131,28 @@ fun countArrangementDFS(vis: IntArray, deep: Int, n: Int): Int {
     }
     return ansCountInThisDeep
 }
+// 551. 学生出勤记录 I
+fun checkRecord(s: String): Boolean {
+    var continuation = 0
+    var absentDay = 0
+    for (c in s) {
+        if (c == 'A') {
+            if (absentDay == 1) return false
+            else {
+                absentDay = 1
+                continuation = 0
+            }
+        }
+        else if (c == 'L') {
+            if (continuation == 2) return false
+            else continuation++
+        }
+        else {
+            continuation = 0
+        }
+    }
+    return true
+}
 fun main () {
     val array = intArrayOf(3)
     val intArray1 = intArrayOf(2,3,7,6)
