@@ -153,6 +153,30 @@ fun checkRecord(s: String): Boolean {
     }
     return true
 }
+// 345. 反转字符串中的元音字母
+fun reverseVowels(s: String): String {
+    val vowels = hashSetOf("a", "e", "i", "o", "u", "A", "E", "I", "O", "U")
+    var frontPointer = 0
+    var backPointer = s.lastIndex
+    var ans = s
+    while (frontPointer < backPointer) {
+        val frontString = ans[frontPointer].toString()
+        val backString = ans[backPointer].toString()
+        if (vowels.contains(frontString) && vowels.contains(backString)) {
+            ans = ans.replaceRange(frontPointer, frontPointer + 1, backString)
+            ans = ans.replaceRange(backPointer, backPointer + 1, frontString)
+            frontPointer++
+            backPointer--
+        }
+        while (frontPointer <= s.lastIndex &&!vowels.contains(ans[frontPointer].toString())) {
+            frontPointer++
+        }
+        while (backPointer >= 0 && !vowels.contains(ans[backPointer].toString())) {
+            backPointer--
+        }
+    }
+    return ans
+}
 fun main () {
     val array = intArrayOf(3)
     val intArray1 = intArrayOf(2,3,7,6)
@@ -160,6 +184,6 @@ fun main () {
     val intList2 = mutableListOf(1, 2, 3)
     val str = "cbbd"
     val arrayIntArray = arrayOf(intArrayOf(1), intArrayOf(0,2,4), intArrayOf(1,3,4), intArrayOf(2), intArrayOf(1,2))
-    val ans = countArrangement(14)
+    val ans = reverseVowels(str)
     println(ans)
 }
