@@ -177,6 +177,33 @@ fun reverseVowels(s: String): String {
     }
     return ans
 }
+// 541. 反转字符串 II
+fun reverseStr(s: String, k: Int): String {
+    if (k == 1) return s
+    val repeatTime = s.length / k / 2
+    val remain = s.length % (2 * k)
+    var ans = ""
+    var prePointer = 0
+    var midPointer = prePointer + k
+    var backPointer = midPointer + k - 1
+    repeat(repeatTime) {
+        ans += s.substring(prePointer until midPointer).reversed()
+        ans += s.substring(midPointer..backPointer)
+        prePointer += 2 * k
+        midPointer += 2 * k
+        backPointer += 2 * k
+    }
+    if (remain != 0) {
+        if (remain < k) {
+            ans += s.substring(prePointer until s.length).reversed()
+        }
+        else {
+            ans += s.substring(prePointer until midPointer).reversed()
+            ans += s.substring(midPointer until s.length)
+        }
+    }
+    return ans
+}
 fun main () {
     val array = intArrayOf(3)
     val intArray1 = intArrayOf(2,3,7,6)
@@ -184,6 +211,6 @@ fun main () {
     val intList2 = mutableListOf(1, 2, 3)
     val str = "cbbd"
     val arrayIntArray = arrayOf(intArrayOf(1), intArrayOf(0,2,4), intArrayOf(1,3,4), intArrayOf(2), intArrayOf(1,2))
-    val ans = reverseVowels(str)
+    val ans = reverseStr(str, 2)
     println(ans)
 }
