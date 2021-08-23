@@ -204,6 +204,24 @@ fun reverseStr(s: String, k: Int): String {
     }
     return ans
 }
+// 1646. 获取生成数组中的最大值
+fun getMaximumGenerated(n: Int): Int {
+    val array = Array(n + 1) { 0 }
+    if (n <= 1) return n
+    array[1] = 1
+    var ans = 1
+    var i = 1
+    while (2 * i <= n) {
+        array[2 * i] = array[i]
+        ans = max(array[2 * i], ans)
+        if (2 * i + 1 <= n) {
+            array[2 * i + 1] = array[i] + array[i + 1]
+            ans = max(array[2 * i + 1], ans)
+        }
+        i++
+    }
+    return ans
+}
 fun main () {
     val array = intArrayOf(3)
     val intArray1 = intArrayOf(2,3,7,6)
@@ -211,6 +229,6 @@ fun main () {
     val intList2 = mutableListOf(1, 2, 3)
     val str = "cbbd"
     val arrayIntArray = arrayOf(intArrayOf(1), intArrayOf(0,2,4), intArrayOf(1,3,4), intArrayOf(2), intArrayOf(1,2))
-    val ans = reverseStr(str, 2)
+    val ans = getMaximumGenerated(2)
     println(ans)
 }
