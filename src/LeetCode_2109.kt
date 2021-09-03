@@ -16,3 +16,27 @@ fun getKthFromEnd(head: ListNode?, k: Int): ListNode? {
     }
     return stack.peek()
 }
+// 面试题 17.14. 最小K个数
+fun smallestK(arr: IntArray, k: Int): IntArray {
+    val queue = PriorityQueue<Int>()
+    for (i in arr) {
+        queue.add(i)
+    }
+    var k1 = k
+    val ans = mutableListOf<Int>()
+    while (queue.isNotEmpty() && k1 != 0) {
+        ans.add(queue.remove())
+        k1--
+    }
+    return ans.toIntArray()
+}
+fun main () {
+    val array = intArrayOf(3)
+    val intArray1 = intArrayOf(2,3,7,6)
+    val intList1 = mutableListOf(1, 2, 3)
+    val intList2 = mutableListOf(1, 2, 3)
+    val str = "cbbd"
+    val arrayIntArray = arrayOf(intArrayOf(1), intArrayOf(0,2,4), intArrayOf(1,3,4), intArrayOf(2), intArrayOf(1,2))
+    val ans = smallestK(intArray1, 2)
+    println(ans.contentToString())
+}
