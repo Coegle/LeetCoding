@@ -51,6 +51,24 @@ fun search(nums: IntArray, target: Int): Int {
     }
     return -1
 }
+
+// 1221. 分割平衡字符串
+fun balancedStringSplit(s: String): Int {
+    var ans = 0
+    var bias = 0
+    for (c in s) {
+        if (c == 'L') {
+            bias++
+        }
+        else {
+            bias--
+        }
+        if (bias == 0) {
+            ans++
+        }
+    }
+    return ans
+}
 fun main () {
     val array = intArrayOf(3)
     val intArray1 = intArrayOf(-1,0,3,5,9,12)
