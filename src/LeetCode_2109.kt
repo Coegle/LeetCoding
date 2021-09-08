@@ -1,4 +1,5 @@
 import java.util.*
+import kotlin.Comparator
 
 class ListNode(var `val`: Int) {
     var next: ListNode? = null
@@ -69,13 +70,42 @@ fun balancedStringSplit(s: String): Int {
     }
     return ans
 }
+
+// 502. IPO
+fun findMaximizedCapital(k: Int, w: Int, profits: IntArray, capital: IntArray): Int {
+    data class Project(val capital: Int, val profit: Int)
+    val comparator1: Comparator<Project> = compareBy { it.capital }
+    val comparator2: Comparator<Project> = compareBy { -it.profit }
+    val notQualifiedQueue = PriorityQueue(comparator1)
+    val maxProfitQueue = PriorityQueue(comparator2)
+    for (idx in profits.indices) {
+        notQualifiedQueue.add(Project(capital[idx], profits[idx]))
+    }
+    var maxCapital = w
+    var projectNum = k
+    while (projectNum != 0) {
+        // 挑出当次符合资格的项目
+        while (notQualifiedQueue.isNotEmpty() && notQualifiedQueue.peek().capital <= maxCapital) {
+            maxProfitQueue.add(notQualifiedQueue.remove())
+        }
+        // 挑出当次最有价值的项目
+        if (maxProfitQueue.isNotEmpty()) {
+            maxCapital += maxProfitQueue.remove().profit
+            projectNum--
+        }
+        else {
+            break
+        }
+    }
+    return maxCapital
+}
 fun main () {
-    val array = intArrayOf(3)
-    val intArray1 = intArrayOf(-1,0,3,5,9,12)
+    val array = intArrayOf(1,2,3)
+    val intArray1 = intArrayOf(0,1,2)
     val intList1 = mutableListOf(1, 2, 3)
     val intList2 = mutableListOf(1, 2, 3)
     val str = "cbbd"
     val arrayIntArray = arrayOf(intArrayOf(1), intArrayOf(0,2,4), intArrayOf(1,3,4), intArrayOf(2), intArrayOf(1,2))
-    val ans = search(intArray1, 2)
+    val ans = findMaximizedCapital(3, 0, array, intArray1)
     println(ans)
 }
