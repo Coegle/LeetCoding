@@ -99,6 +99,61 @@ fun findMaximizedCapital(k: Int, w: Int, profits: IntArray, capital: IntArray): 
     }
     return maxCapital
 }
+// 68. 文本左右对齐
+fun fullJustify(words: Array<String>, maxWidth: Int): List<String> {
+    val paragraphs: MutableList<MutableList<String>> = mutableListOf()
+    // 分行
+    var width = 0
+    var paragraph: MutableList<String> = mutableListOf()
+    var idx = 0
+    while (idx < words.size) {
+        while (idx < words.size && words[idx].length + width <= maxWidth) {
+            paragraph.add(words[idx])
+            width += words[idx].length + 1
+            idx++
+        }
+        width = 0
+        paragraphs.add(paragraph)
+        paragraph = mutableListOf()
+    }
+    // 处理每行（除末行）
+    idx = 0
+    val ans = mutableListOf<String>()
+    while (idx < paragraphs.size - 1) {
+        val thisParagraph = paragraphs[idx]
+        var string = ""
+        if (thisParagraph.size == 1) {
+            string = thisParagraph[0] + " ".repeat(maxWidth - thisParagraph[0].length)
+        }
+        else {
+            var totalWidth = maxWidth
+            thisParagraph.forEach { totalWidth -= it.length }
+            val commonWidth = totalWidth / (thisParagraph.size - 1)
+
+            var leftWidth = totalWidth % (thisParagraph.size - 1)
+            println("$commonWidth, $leftWidth")
+            var idx2 = 0
+            while (idx2 < thisParagraph.size - 1) {
+                string += thisParagraph[idx2] + " ".repeat(commonWidth + if (leftWidth == 0) 0 else 1)
+                leftWidth = if (leftWidth != 0) leftWidth - 1 else 0
+                idx2++
+            }
+            string += thisParagraph[idx2]
+        }
+        ans.add(string)
+        idx++
+    }
+    // 处理末尾段落
+    val lastParagraph = paragraphs[idx]
+    var lastStr = ""
+    for (i in 0..lastParagraph.size - 2) {
+        lastStr += lastParagraph[i] + " "
+    }
+    lastStr += lastParagraph.last()
+    lastStr += " ".repeat(maxWidth - lastStr.length)
+    ans += lastStr
+    return ans
+}
 fun main () {
     val array = intArrayOf(1,2,3)
     val intArray1 = intArrayOf(0,1,2)
@@ -106,6 +161,8 @@ fun main () {
     val intList2 = mutableListOf(1, 2, 3)
     val str = "cbbd"
     val arrayIntArray = arrayOf(intArrayOf(1), intArrayOf(0,2,4), intArrayOf(1,3,4), intArrayOf(2), intArrayOf(1,2))
-    val ans = findMaximizedCapital(3, 0, array, intArray1)
+    val arrayOfStrings = arrayOf("Science","is","what","we","understand","well","enough","to","explain",
+                "to","a","computer.","Art","is","everything","else","we","do")
+    val ans = fullJustify(arrayOfStrings, 20)
     println(ans)
 }
