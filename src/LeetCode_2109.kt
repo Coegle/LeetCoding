@@ -154,6 +154,25 @@ fun fullJustify(words: Array<String>, maxWidth: Int): List<String> {
     ans += lastStr
     return ans
 }
+
+// 1894. 找到需要补充粉笔的学生编号
+fun chalkReplacer(chalk: IntArray, k: Int): Int {
+    var cycle = 0
+    for (i in chalk.indices) {
+        cycle += chalk[i]
+        // 如果累加过程中大于粉笔数 K，则说明在第一轮的当前已经用完，直接返回当前 index，无需继续累加，可以防止数据过大导致溢出
+        if (cycle > k) {
+            return i
+        }
+    }
+    var remain = k % cycle
+    var ans = 0
+    while (remain >= 0) {
+        remain -= chalk[ans]
+        ans++
+    }
+    return ans - 1
+}
 fun main () {
     val array = intArrayOf(1,2,3)
     val intArray1 = intArrayOf(0,1,2)
