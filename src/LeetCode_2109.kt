@@ -173,15 +173,30 @@ fun chalkReplacer(chalk: IntArray, k: Int): Int {
     }
     return ans - 1
 }
+// 66. 加一
+fun plusOne(digits: IntArray): IntArray {
+    for (i in digits.size-1 downTo 0) {
+        digits[i]++
+        if (digits[i] == 10) {
+            digits[i] = 0
+        }
+        else {
+            return digits
+        }
+    }
+    val after = digits.toMutableList()
+    after.add(0, 1)
+    return after.toIntArray()
+}
 fun main () {
     val array = intArrayOf(1,2,3)
-    val intArray1 = intArrayOf(0,1,2)
+    val intArray1 = intArrayOf(9,1)
     val intList1 = mutableListOf(1, 2, 3)
     val intList2 = mutableListOf(1, 2, 3)
     val str = "cbbd"
     val arrayIntArray = arrayOf(intArrayOf(1), intArrayOf(0,2,4), intArrayOf(1,3,4), intArrayOf(2), intArrayOf(1,2))
     val arrayOfStrings = arrayOf("Science","is","what","we","understand","well","enough","to","explain",
                 "to","a","computer.","Art","is","everything","else","we","do")
-    val ans = fullJustify(arrayOfStrings, 20)
-    println(ans)
+    val ans = plusOne(intArray1)
+    println(ans.contentToString())
 }
