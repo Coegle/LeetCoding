@@ -1,3 +1,4 @@
+import java.util.*
 import kotlin.math.sqrt
 
 // 492. 构造矩形
@@ -26,7 +27,29 @@ fun searchMatrix(matrix: Array<IntArray>, target: Int): Boolean {
     }
     return false
 }
-
+// 496. 下一个更大元素 I
+fun nextGreaterElement(nums1: IntArray, nums2: IntArray): IntArray {
+    val hashMap = hashMapOf<Int, Int>()
+    val decreaseStack = Stack<Int>()
+    for (num in nums2) {
+        while (decreaseStack.isNotEmpty()) {
+            val topNum = decreaseStack.peek()
+            if (topNum >= num) {
+                break
+            }
+            else {
+                hashMap[topNum] = num
+                decreaseStack.pop()
+            }
+        }
+        decreaseStack.push(num)
+    }
+    val ans = mutableListOf<Int>()
+    for (num in nums1) {
+        ans.add(hashMap[num] ?: -1)
+    }
+    return ans.toIntArray()
+}
 fun main () {
     val array = intArrayOf(1,2,3)
     val intArray1 = intArrayOf(9,1)
