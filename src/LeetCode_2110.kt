@@ -27,6 +27,7 @@ fun searchMatrix(matrix: Array<IntArray>, target: Int): Boolean {
     }
     return false
 }
+
 // 496. 下一个更大元素 I
 fun nextGreaterElement(nums1: IntArray, nums2: IntArray): IntArray {
     val hashMap = hashMapOf<Int, Int>()
@@ -49,6 +50,11 @@ fun nextGreaterElement(nums1: IntArray, nums2: IntArray): IntArray {
         ans.add(hashMap[num] ?: -1)
     }
     return ans.toIntArray()
+}
+
+// 231. 2 的幂
+fun isPowerOfTwo(n: Int): Boolean {
+    return n > 0 && n.and(n-1) == 0
 }
 fun main () {
     val array = intArrayOf(1,2,3)
