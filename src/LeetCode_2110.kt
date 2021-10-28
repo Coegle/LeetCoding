@@ -1,4 +1,5 @@
 import java.util.*
+import kotlin.collections.HashSet
 import kotlin.math.sqrt
 
 // 492. 构造矩形
@@ -55,6 +56,31 @@ fun nextGreaterElement(nums1: IntArray, nums2: IntArray): IntArray {
 // 231. 2 的幂
 fun isPowerOfTwo(n: Int): Boolean {
     return n > 0 && n.and(n-1) == 0
+}
+
+// 869. 重新排序得到 2 的幂
+fun reorderedPowerOf2(n: Int): Boolean {
+    val numbers = Array(31) { 1.shl(it) }.toHashSet()
+    val cntHash = HashSet<Int>()
+    for (num in numbers) {
+        val hash = reorderedPowerOf2ToGetHash(num)
+        cntHash.add(hash)
+    }
+    val nHash = reorderedPowerOf2ToGetHash(n)
+    return cntHash.contains(nHash)
+}
+fun reorderedPowerOf2ToGetHash(n: Int): Int {
+    var number = n
+    val cntArray = Array(10) {0}
+    while (number > 0) {
+        cntArray[number % 10]++
+        number = number.div(10)
+    }
+    var hash = 0
+    for (cnt in cntArray) {
+        hash = (hash + cnt) * 10
+    }
+    return hash
 }
 fun main () {
     val array = intArrayOf(1,2,3)
