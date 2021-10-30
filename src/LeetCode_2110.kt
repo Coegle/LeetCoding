@@ -93,6 +93,27 @@ fun isSelfCrossing(distance: IntArray): Boolean {
     }
     return false
 }
+// 260. 只出现一次的数字 III
+fun singleNumber(nums: IntArray): IntArray {
+    var xorResult = 0
+    nums.forEach { xorResult = xorResult.xor(it) }
+    var k = 0
+    for (i in 0 until 32) {
+        if (xorResult.and(1.shl(i)) != 0) {
+            k = i
+            break
+        }
+    }
+    val ans = IntArray(2)
+    nums.forEach {
+        if (it.and(1.shl(k)) != 0) {
+            ans[0] = ans[0].xor(it)
+        }
+        else ans[1] = ans[1].xor(it)
+    }
+    return ans
+}
+
 fun main () {
     val array = intArrayOf(1,2,3)
     val intArray1 = intArrayOf(9,1)
