@@ -93,6 +93,7 @@ fun isSelfCrossing(distance: IntArray): Boolean {
     }
     return false
 }
+
 // 260. 只出现一次的数字 III
 fun singleNumber(nums: IntArray): IntArray {
     var xorResult = 0
@@ -114,6 +115,25 @@ fun singleNumber(nums: IntArray): IntArray {
     return ans
 }
 
+// 500. 键盘行
+fun findWords(words: Array<String>): Array<String> {
+    val charAtRow = "12210111011122000010020202"
+    val ans = mutableListOf<String>()
+    for (word in words) {
+        var flag = 0
+        val row = charAtRow[word[0].lowercaseChar() - 'a']
+        for (c in word) {
+            if (charAtRow[c.lowercaseChar() - 'a'] != row) {
+                flag = 1
+                break
+            }
+        }
+        if (flag == 0) {
+            ans.add(word)
+        }
+    }
+    return ans.toTypedArray()
+}
 fun main () {
     val array = intArrayOf(1,2,3)
     val intArray1 = intArrayOf(9,1)
@@ -121,8 +141,7 @@ fun main () {
     val intList2 = mutableListOf(1, 2, 3)
     val str = "cbbd"
     val arrayIntArray = arrayOf(intArrayOf(1,2,3,4,5), intArrayOf(6,7,8,9,10), intArrayOf(11,12,13,14,15), intArrayOf(16,17,18,19,20), intArrayOf(21,22,23,24,25))
-    val arrayOfStrings = arrayOf("Science","is","what","we","understand","well","enough","to","explain",
-        "to","a","computer.","Art","is","everything","else","we","do")
-    val ans = searchMatrix(arrayIntArray, 20)
-    println(ans)
+    val arrayOfStrings = arrayOf("Hello","Alaska","Dad","Peace")
+    val ans = findWords(arrayOfStrings)
+    println(ans.contentToString())
 }
