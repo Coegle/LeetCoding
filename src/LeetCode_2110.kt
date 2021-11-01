@@ -1,3 +1,4 @@
+import java.lang.Integer.min
 import java.util.*
 import kotlin.collections.HashSet
 import kotlin.math.sqrt
@@ -134,6 +135,13 @@ fun findWords(words: Array<String>): Array<String> {
     }
     return ans.toTypedArray()
 }
+
+// 575. 分糖果
+fun distributeCandies(candyType: IntArray): Int {
+    val set = candyType.distinct()
+    return min(candyType.size / 2, set.size)
+}
+
 fun main () {
     val array = intArrayOf(1,2,3)
     val intArray1 = intArrayOf(9,1)
