@@ -1,4 +1,3 @@
-import java.lang.Integer.max
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashSet
@@ -400,14 +399,14 @@ fun stoneGameIX(stones: IntArray): Boolean {
     }
     return if (nums[0] % 2 == 0) {
         nums[1] != 0 && nums[2] != 0
-    }
-    else {
+    } else {
         abs(nums[1] - nums[2]) > 2
     }
 }
 
 // 1345. 跳跃游戏 IV
 data class MinJumpsPair(val idx: Int, val depth: Int)
+
 fun minJumps(arr: IntArray): Int {
     val map = mutableMapOf<Int, ArrayDeque<Int>>()
     val vis = mutableSetOf<Int>() // idx
@@ -446,9 +445,142 @@ fun minJumps(arr: IntArray): Int {
     return arr.size - 1
 }
 
+// 1332. 删除回文子序列
+fun removePalindromeSub(s: String): Int {
+    if (s.isEmpty()) return 0
+    for (i in 0 until s.length / 2) {
+        if (s[i] != s[s.length - 1 - i]) return 2
+    }
+    return 1
+}
+
+// 2034. 股票价格波动
+class StockPrice() {
+    private val prices = hashMapOf<Int, Int>() // timestamp, price
+    private val orders = TreeMap<Int, Int>() // price, cnt
+    private var current = 0
+    fun update(timestamp: Int, price: Int) {
+        if (prices.containsKey(timestamp)) { // 修正
+            val oldPrice: Int = prices[timestamp]!!
+            if (orders[oldPrice] == 1) {
+                orders.remove(oldPrice)
+            } else {
+                orders[oldPrice] = orders[oldPrice]!!.minus(1)
+            }
+        }
+        current = Math.max(timestamp, current)
+        prices[timestamp] = price
+        orders[price] = orders[price]?.plus(1) ?: 1
+    }
+
+    fun current(): Int {
+        return prices[current]!!
+    }
+
+    fun maximum(): Int {
+        return orders.lastKey()
+    }
+
+    fun minimum(): Int {
+        return orders.firstKey()
+    }
+}
+
+// 2045. 到达目的地的第二短时间
+data class SecondMinimumPair(val idx: Int, val depth: Int)
+
+fun secondMinimum_CalTime(num: Int, passTime: Int, change: Int): Int {
+    var ret = 0
+    repeat(num) {
+        if (ret % (2 * change) >= change) {
+            ret += (2 * change - ret % (2 * change))
+        }
+        ret += passTime
+    }
+    return ret
+}
+
+fun secondMinimum(n: Int, edges: Array<IntArray>, time: Int, change: Int): Int {
+    val nxtNodeTable = mutableMapOf<Int, MutableList<Int>>()
+    val lastNode = MutableList(n + 1) { it }
+    edges.forEach {
+        if (!nxtNodeTable.containsKey(it[0])) {
+            nxtNodeTable[it[0]] = mutableListOf(it[1])
+        } else {
+            nxtNodeTable[it[0]]!!.add(it[1])
+        }
+        if (!nxtNodeTable.containsKey(it[1])) {
+            nxtNodeTable[it[1]] = mutableListOf(it[0])
+        } else {
+            nxtNodeTable[it[1]]!!.add(it[0])
+        }
+    }
+    val visDepth = MutableList<MutableSet<Int>>(n + 1) { mutableSetOf() }
+    val queue = ArrayDeque<SecondMinimumPair>()
+
+    queue.add(SecondMinimumPair(1, 0))
+    visDepth[1].add(0)
+
+    while (queue.isNotEmpty()) {
+        val now = queue.removeFirst()
+        nxtNodeTable[now.idx]?.let {
+            for (nxtIdx in it) {
+                if (nxtIdx == n && visDepth[n].size == 1 && !visDepth[n].contains(now.depth + 1)) {
+                    return secondMinimum_CalTime(now.depth + 1, time, change)
+                }
+                if (visDepth[nxtIdx].size != 2) {
+                    queue.addLast(SecondMinimumPair(nxtIdx, now.depth + 1))
+                    lastNode[nxtIdx] = now.idx
+                    visDepth[nxtIdx].add(now.depth + 1)
+                }
+            }
+        }
+    }
+    return -1
+}
+
+// 1688. 比赛中的配对次数
+fun numberOfMatches(n: Int): Int {
+    var remainTeam = n
+    var ans = 0
+    while (remainTeam > 1) {
+        ans += remainTeam / 2
+        remainTeam = remainTeam / 2 + remainTeam % 2
+    }
+    return ans
+}
+
+// 2013. 检测正方形
+class DetectSquares() {
+    private val map = mutableMapOf<Int, MutableMap<Int, Int>>()
+    fun add(point: IntArray) {
+        val x = point[0]
+        val y = point[1]
+        map.putIfAbsent(x, mutableMapOf())
+        map[x]!![y] = map[x]!!.getOrDefault(y, 0) + 1
+    }
+
+    fun count(point: IntArray): Int {
+        var ans = 0
+        val x = point[0]
+        val y = point[1]
+        val xCol = map.getOrDefault(x, mutableMapOf())
+        for (p1 in xCol) {
+            val length = y - p1.key
+            if (length == 0) continue
+            ans += p1.value * (map[x - length]?.get(p1.key) ?: 0) * (map[x - length]?.get(y) ?: 0)
+            ans += p1.value * (map[x + length]?.get(p1.key) ?: 0) * (map[x + length]?.get(y) ?: 0)
+        }
+        return ans
+    }
+}
+
 fun main() {
     val num = 3
-    val intArray = intArrayOf(11,22,7,7,7,7,7,7,7,22,13)
-    val ans = minJumps(intArray)
+    val array = arrayOf(
+        intArrayOf(1, 2),
+
+        )
+    val ans = secondMinimum(2, array, 3, 2)
     println(ans)
 }
