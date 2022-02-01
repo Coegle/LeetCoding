@@ -3,6 +3,7 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashSet
 import kotlin.collections.ArrayDeque
 import kotlin.math.abs
+import kotlin.math.max
 
 // 71. 简化路径
 fun simplifyPath(path: String): String {
@@ -573,6 +574,113 @@ class DetectSquares() {
         }
         return ans
     }
+}
+
+// 2047. 句子中的有效单词数
+fun countValidWords(sentence: String): Int {
+    var state = 0
+    var ans = 0
+    for (c in sentence) {
+        when (c) {
+            in 'a'..'z' -> {
+                when (state) {
+                    0 -> state = 1
+                    2 -> state = 5
+                    3 -> state = 4
+                }
+            }
+            in '0'..'9' -> {
+                state = 4
+            }
+            '!', '.', ',' -> {
+                state = when (state) {
+                    0, 1, 5 -> 3
+                    else -> 4
+                }
+            }
+            ' ' -> {
+                if (state == 1 || state == 3 || state == 5) ans++
+                state = 0
+            }
+            '-' -> {
+                state = when (state) {
+                    1 -> 2
+                    else -> 4
+                }
+            }
+        }
+    }
+    if (state == 1 || state == 3 || state == 5) ans++
+    return ans
+}
+
+// 1996. 游戏中弱角色的数量
+fun numberOfWeakCharacters(properties: Array<IntArray>): Int {
+    val comparator = compareByDescending<IntArray> { it[0] }.thenBy { it[1] }
+    val array = properties.sortedWith(comparator)
+    var ans = 0
+    var maxY = array[0][1]
+    for (role in array) {
+        if (role[1] > maxY) maxY = role[1]
+        else if (role[1] < maxY) ans++
+    }
+    return ans
+}
+
+// 1765. 地图中的最高点
+fun highestPeak(isWater: Array<IntArray>): Array<IntArray> {
+    val steps = arrayOf(intArrayOf(1, 0), intArrayOf(0, 1), intArrayOf(-1, 0), intArrayOf(0, -1))
+    val queue = ArrayDeque<IntArray>()
+    val map = Array(isWater.size) { IntArray(isWater[0].size) { -1 } }
+    var time = 0
+    for (i in isWater.indices) {
+        for ( j in isWater[i].indices) {
+            if (isWater[i][j] == 1) {
+                map[i][j] = 0
+                queue.addLast(intArrayOf(i, j))
+            }
+        }
+    }
+    time++
+    while (queue.isNotEmpty()) {
+        repeat(queue.size) {
+            val now = queue.removeFirst()
+            for (step in steps) {
+                val next = intArrayOf(now[0] + step[0], now[1] + step[1])
+                if (next[0] >= 0 && next[0] < map.size && next[1] >= 0 && next[1] < map[0].size && map[next[0]][next[1]] == -1) {
+                    queue.addLast(next)
+                    map[next[0]][next[1]] = time
+                }
+            }
+        }
+        time++
+    }
+    return map
+}
+
+// 884. 两句话中的不常见单词
+fun uncommonFromSentences(s1: String, s2: String): Array<String> {
+    val map = mutableMapOf<String, Int>()
+    val words = s1.split(' ') + s2.split(' ')
+    words.forEach { map[it] = map.getOrDefault(it, 0) + 1 }
+    return map.filter { it.value == 1 }.map { it.key }.toTypedArray()
+}
+
+// 1342. 将数字变成 0 的操作次数
+fun numberOfSteps(num: Int): Int {
+    var ans = 0
+    var now = num
+    while (now > 0) {
+        if (now.and(1) == 1) {
+            ans++
+            now--
+        }
+        else {
+            ans++
+            now = now.shr(1)
+        }
+    }
+    return ans
 }
 
 fun main() {
