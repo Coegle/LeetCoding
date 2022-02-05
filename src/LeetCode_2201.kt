@@ -4,6 +4,7 @@ import kotlin.collections.HashSet
 import kotlin.collections.ArrayDeque
 import kotlin.math.abs
 import kotlin.math.max
+import kotlin.math.min
 
 // 71. 简化路径
 fun simplifyPath(path: String): String {
@@ -634,7 +635,7 @@ fun highestPeak(isWater: Array<IntArray>): Array<IntArray> {
     val map = Array(isWater.size) { IntArray(isWater[0].size) { -1 } }
     var time = 0
     for (i in isWater.indices) {
-        for ( j in isWater[i].indices) {
+        for (j in isWater[i].indices) {
             if (isWater[i][j] == 1) {
                 map[i][j] = 0
                 queue.addLast(intArrayOf(i, j))
@@ -674,10 +675,59 @@ fun numberOfSteps(num: Int): Int {
         if (now.and(1) == 1) {
             ans++
             now--
-        }
-        else {
+        } else {
             ans++
             now = now.shr(1)
+        }
+    }
+    return ans
+}
+
+// 1725. 可以形成最大正方形的矩形数目
+fun countGoodRectangles(rectangles: Array<IntArray>): Int {
+    var cnt = 0
+    var maxLen = 0
+    for (rectangle in rectangles) {
+        val now = min(rectangle[0], rectangle[1])
+        if (now > maxLen) {
+            maxLen = now
+            cnt = 1
+        } else if (now == maxLen) {
+            cnt++
+        }
+    }
+    return cnt
+}
+
+// 1219. 黄金矿工
+fun getMaxinumGold_dfs(grid: Array<IntArray>, nowScore: Int, nowPos: IntArray): Int {
+    println(nowPos.contentToString())
+    var ret = nowScore
+    val nexts = arrayOf(intArrayOf(1, 0), intArrayOf(0, -1), intArrayOf(0, 1), intArrayOf(-1, 0))
+    for (nextStep in nexts) {
+        val next = intArrayOf(nowPos[0] + nextStep[0], nowPos[1] + nextStep[1])
+        if (next[0] >= 0 && next[1] >= 0 && next[0] < grid.size && next[1] < grid[0].size) {
+            val nextScore = grid[next[0]][next[1]]
+            if (nextScore != 0) {
+                grid[next[0]][next[1]] = 0
+                ret = max(getMaxinumGold_dfs(grid, nowScore + nextScore, next), ret)
+                grid[next[0]][next[1]] = nextScore
+            }
+        }
+    }
+    return ret
+}
+
+fun getMaximumGold(grid: Array<IntArray>): Int {
+    var ans = 0
+    for (x in grid.indices) {
+        for (y in grid[x].indices) {
+            val nextScore = grid[x][y]
+            if (nextScore != 0) {
+                grid[x][y] = 0
+                ans = max(getMaxinumGold_dfs(grid, nextScore, intArrayOf(x, y)), ans)
+                grid[x][y] = nextScore
+            }
         }
     }
     return ans
@@ -687,8 +737,7 @@ fun main() {
     val num = 3
     val array = arrayOf(
         intArrayOf(1, 2),
-
-        )
-    val ans = secondMinimum(2, array, 3, 2)
+    )
+    val ans = findMinFibonacciNumbers(10)
     println(ans)
 }
