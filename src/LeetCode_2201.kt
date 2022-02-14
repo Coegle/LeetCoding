@@ -701,7 +701,6 @@ fun countGoodRectangles(rectangles: Array<IntArray>): Int {
 
 // 1219. 黄金矿工
 fun getMaxinumGold_dfs(grid: Array<IntArray>, nowScore: Int, nowPos: IntArray): Int {
-    println(nowPos.contentToString())
     var ret = nowScore
     val nexts = arrayOf(intArrayOf(1, 0), intArrayOf(0, -1), intArrayOf(0, 1), intArrayOf(-1, 0))
     for (nextStep in nexts) {
@@ -731,13 +730,4 @@ fun getMaximumGold(grid: Array<IntArray>): Int {
         }
     }
     return ans
-}
-
-fun main() {
-    val num = 3
-    val array = arrayOf(
-        intArrayOf(1, 2),
-    )
-    val ans = findMinFibonacciNumbers(10)
-    println(ans)
 }
