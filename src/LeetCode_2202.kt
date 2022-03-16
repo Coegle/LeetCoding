@@ -1,7 +1,9 @@
-import java.util.*
+import java.util.PriorityQueue
 import kotlin.collections.ArrayDeque
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.random.Random
+import kotlin.random.nextInt
 
 // 395. 至少有 K 个重复字符的最长子串
 fun longestSubstring(s: String, k: Int): Int {
@@ -381,13 +383,265 @@ fun singleNonDuplicate(nums: IntArray): Int {
     return -1
 }
 
-fun main() {
-    val num = 3
-    val IntArray2d = arrayOf(
-        intArrayOf(0, 0),
-        intArrayOf(0, 4)
-    )
-    val intArray = intArrayOf(1,1,2)
-    val ans = singleNonDuplicate(intArray)
-    println(ans)
+// 1380. 矩阵中的幸运数
+fun luckyNumbers(matrix: Array<IntArray>): List<Int> {
+    val cols = matrix[0].size
+    val maxNumIdxInCols = MutableList(cols) { 0 }
+    for (j in 0 until cols) {
+        for (i in matrix.indices) {
+            if (matrix[i][j] > matrix[maxNumIdxInCols[j]][j]) maxNumIdxInCols[j] = i
+        }
+    }
+    val ans = mutableListOf<Int>()
+    for (i in matrix.indices) {
+        val row = matrix[i]
+        val minNumColIdx = row.foldIndexed(0) { idx, acc, num -> if (num < row[acc]) idx else acc }
+        if (maxNumIdxInCols[minNumColIdx] == i) ans.add(row[minNumColIdx])
+    }
+    return ans
+}
+
+// 144. 二叉树的前序遍历
+fun preorderTraversal(root: TreeNode?): List<Int> {
+    if (root == null) return emptyList()
+    val ans = mutableListOf<Int>()
+    val stack = ArrayDeque<TreeNode>()
+    stack.addLast(root)
+    while (stack.isNotEmpty()) {
+        val node = stack.removeLast()
+        ans.add(node.`val`)
+        node.right?.let {
+            stack.addLast(it)
+        }
+        node.left?.let {
+            stack.addLast(it)
+        }
+    }
+    return ans
+}
+
+// 94. 二叉树的中序遍历
+fun inorderTraversal(root: TreeNode?): List<Int> {
+    if (root == null) return emptyList()
+    val ans = mutableListOf<Int>()
+    val stack = ArrayDeque<TreeNode>()
+    var node = root
+    while (node != null || stack.isNotEmpty()) {
+        while (node != null) {
+            stack.addLast(node)
+            node = node.left
+        }
+        node = stack.removeLast()
+        ans.add(node.`val`)
+        if (node.right == null) {
+            // 没有右子树，node 遍历完毕
+            node = null
+        } else {
+            node = node.right
+        }
+    }
+    return ans
+}
+
+fun inorderTraversalSolution2(root: TreeNode?): List<Int> {
+    if (root == null) return emptyList()
+    val ans = mutableListOf<Int>()
+    val stack = ArrayDeque<Pair<TreeNode, Int>>() // 0 没遍历过
+    stack.addLast(Pair(root, 0))
+    while (stack.isNotEmpty()) {
+        val pair = stack.removeLast()
+        if (pair.second == 0) { // 没遍历过
+            pair.first.right?.let { stack.addLast(Pair(it, 0)) }
+            stack.addLast(Pair(pair.first, 1))
+            pair.first.left?.let { stack.addLast(Pair(it, 0)) }
+        } else {
+            ans.add(pair.first.`val`)
+        }
+    }
+    return ans
+}
+
+// 145. 二叉树的后序遍历
+fun postorderTraversal(root: TreeNode?): List<Int> {
+    if (root == null) return emptyList()
+    var node = root
+    var pre: TreeNode? = null
+    val stack = ArrayDeque<TreeNode>()
+    val ans = mutableListOf<Int>()
+    // node 表示的是下一个要遍历的节点，
+    // node 不为空表示它的左子树和右子树都没有遍历，
+    // node 为空表示现在是在往回返
+    while (node != null || stack.isNotEmpty()) {
+        // 左右子树都没遍历过的通通先找最左
+        while (node != null) {
+            stack.addLast(node)
+            node = node.left
+        }
+        node = stack.removeLast()
+        // stack 弹出的已经没有了左子树，所以看它的右子树
+        // 要么右子树为空，要么右子树遍历过
+        if (node.right == null || pre == node.right) {
+            ans.add(node.`val`)
+            pre = node
+            node = null
+        } else {
+            // 有右子树且没被遍历，那 node 还得进栈待着，先遍历右子树
+            stack.addLast(node)
+            node = node.right
+        }
+    }
+    return ans
+}
+
+// 92. 反转链表 II
+fun reverseBetween(head: ListNode?, left: Int, right: Int): ListNode? {
+    if (head == null) return null
+    val stack = ArrayDeque<ListNode>()
+    val dummyHead = ListNode(-1)
+    dummyHead.next = head
+    var node = head
+    var start = dummyHead
+    repeat(left - 1) {
+        start = node!!
+        node = node!!.next
+    }
+    repeat(right - left + 1) {
+        stack.addLast(node!!)
+        node = node!!.next
+    }
+    while (stack.isNotEmpty()) {
+        start.next = stack.removeLast()
+        start = start.next!!
+    }
+    start.next = node
+    return dummyHead.next
+}
+
+fun reverseBetweenSolution2(head: ListNode?, left: Int, right: Int): ListNode? {
+    if (head == null) return null
+    val dummyHead = ListNode(-1)
+    dummyHead.next = head
+    var front = dummyHead
+    repeat(left - 1) {
+        front = front.next!!
+    }
+    var realHead = front.next!!
+    var next: ListNode? = realHead.next
+    repeat(right - left) {
+        next = next!!.next
+        realHead.next!!.next = realHead
+        realHead = realHead.next!!
+    }
+    return dummyHead.next
+}
+
+// 138. 复制带随机指针的链表
+class Node(var `val`: Int) {
+    var next: Node? = null
+    var random: Node? = null
+}
+
+fun copyRandomList(node: Node?): Node? {
+    if (node == null) return null
+    val map = mutableMapOf<Node, Node>()
+    var oldNode: Node = node
+    val newHead = Node(oldNode.`val`)
+    var newNode = newHead
+
+    map[oldNode] = newNode
+
+    while (oldNode.next != null) {
+        val newNext = map.getOrDefault(oldNode.next!!, Node(oldNode.next!!.`val`))
+        newNode.next = newNext
+        map[oldNode.next!!] = newNext
+
+        oldNode.random?.let {
+            val newRandom = map.getOrDefault(it, Node(it.`val`))
+            newNode.random = newRandom
+            map[it] = newRandom
+        }
+        newNode = newNode.next!!
+        oldNode = oldNode.next!!
+    }
+
+    oldNode.random?.let {
+        newNode.random = map[it]
+    }
+    return newHead
+}
+
+// 232. 用栈实现队列
+class MyQueue() {
+    private val inStack = ArrayDeque<Int>()
+    private val outStack = ArrayDeque<Int>()
+    fun push(x: Int) {
+        inStack.addLast(x)
+    }
+
+    private fun ensure() {
+        if (outStack.isNotEmpty()) return
+        while (inStack.isNotEmpty()) {
+            outStack.addLast(inStack.removeLast())
+        }
+    }
+
+    fun pop(): Int {
+        ensure()
+        return outStack.removeLast()
+    }
+
+    fun peek(): Int {
+        ensure()
+        return outStack.last()
+    }
+
+    fun empty(): Boolean {
+        return inStack.isEmpty() && outStack.isEmpty()
+    }
+}
+
+// 剑指 Offer 38. 字符串的排列
+fun permutation_swap(s: CharArray, idx1: Int, idx2: Int) {
+    val tmp = s[idx1]
+    s[idx1] = s[idx2]
+    s[idx2] = tmp
+}
+
+fun permutation_dfs(s: CharArray, startIdx: Int, ans: MutableList<String>) {
+    if (startIdx == s.size - 1) {
+        ans.add(String(s))
+        return
+    }
+    val set = mutableSetOf<Char>()
+    for (idx in startIdx until s.size) {
+        if (set.contains(s[idx])) continue
+        set.add(s[idx])
+        permutation_swap(s, idx, startIdx)
+        permutation_dfs(s, startIdx + 1, ans)
+        permutation_swap(s, idx, startIdx)
+    }
+}
+
+fun permutation(s: String): Array<String> {
+    val ans = mutableListOf<String>()
+    permutation_dfs(s.toCharArray(), 0, ans)
+    return ans.toTypedArray()
+}
+
+// 567. 字符串的排列
+fun checkInclusion(s1: String, s2: String): Boolean {
+    val set1 = IntArray(26) { 0 }
+    val set2 = IntArray(26) { 0 }
+    if (s1.length > s2.length) return false
+    for (idx in s1.indices) {
+        set1[s1[idx] - 'a'] += 1
+        set2[s2[idx] - 'a'] += 1
+    }
+    if (set1.contentEquals(set2)) return true
+    for (idx in s1.length until s2.length) {
+        set2[s2[idx] - 'a'] += 1
+        set2[s2[idx - s1.length] - 'a'] -= 1
+        if (set1.contentEquals(set2)) return true
+    }
+    return false
 }
