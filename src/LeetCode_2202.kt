@@ -645,3 +645,183 @@ fun checkInclusion(s1: String, s2: String): Boolean {
     }
     return false
 }
+
+// 76. 最小覆盖子串
+fun minWindow(s: String, t: String): String {
+    val cntS = mutableMapOf<Char, Int>()
+    val cntT = mutableMapOf<Char, Int>()
+    t.forEach { cntT[it] = cntT.getOrDefault(it, 0) + 1 }
+    var minLen = Int.MAX_VALUE
+    var right = 0
+    var left = 0
+    var match = 0
+    var start = 0
+    while (right < s.length) {
+        cntS[s[right]] = cntS.getOrDefault(s[right], 0) + 1
+        if (cntT.containsKey(s[right]) && cntS[s[right]] == cntT[s[right]]) {
+            match++
+        }
+        while (match == cntT.size) {
+            if (minLen > right - left + 1) {
+                start = left
+                minLen = right - left + 1
+            }
+            cntS[s[left]] = cntS.getOrDefault(s[left], 1) - 1
+            if (cntS.getOrDefault(s[left], 0) < cntT.getOrDefault(s[left], 0)) match--
+            left++
+        }
+        right++
+    }
+    return if (minLen == Int.MAX_VALUE) "" else s.substring(start, start + minLen)
+}
+
+// 98. 验证二叉搜索树
+fun isValidBST_dfs(root: TreeNode?, minVal: Long, maxVal: Long): Boolean {
+    if (root == null) return true
+    if (root.`val` >= maxVal || root.`val` <= minVal) return false
+    return isValidBST_dfs(root.left, minVal, root.`val`.toLong()) && isValidBST_dfs(
+        root.right,
+        root.`val`.toLong(),
+        maxVal
+    )
+}
+
+fun isValidBST(root: TreeNode?): Boolean {
+    return isValidBST_dfs(root, Long.MIN_VALUE, Long.MAX_VALUE)
+}
+
+// 93. 复原 IP 地址
+fun restoreIpAddresses_isValidIP(s: String): Boolean {
+    if (s.isEmpty()) return false
+    if (s[0] == '0' && s.length > 1) return false
+    val num = s.toIntOrNull()
+    if (num == null || num > 255) return false
+    return true
+}
+
+fun restoreIpAddresses_dfs(s: String, nowState: MutableList<String>, nowIdx: Int, ans: MutableSet<String>) {
+    if (nowState.size == 3) {
+        val ip4 = s.substring(nowIdx)
+        if (restoreIpAddresses_isValidIP(ip4)) {
+            val ipAddr = nowState.joinToString(".") + "." + ip4
+            ans.add(ipAddr)
+        }
+        return
+    }
+    for (endIdx in nowIdx until Math.min(nowIdx + 3, s.length - 3 + nowState.size)) {
+        val ipn = s.substring(nowIdx, endIdx + 1)
+        if (restoreIpAddresses_isValidIP(ipn)) {
+            nowState.add(ipn)
+            restoreIpAddresses_dfs(s, nowState, endIdx + 1, ans)
+            nowState.removeAt(nowState.size - 1)
+        }
+    }
+}
+
+fun restoreIpAddresses(s: String): List<String> {
+    if (s.length > 12) return emptyList()
+    val ans = mutableSetOf<String>()
+    val state = mutableListOf<String>()
+    restoreIpAddresses_dfs(s, state, 0, ans)
+    return ans.toList()
+}
+
+// 22. 括号生成
+fun generateParenthesis_dfs(now: String, left: Int, right: Int, ans: MutableList<String>) {
+    if (left == 0) {
+        val s = now + ")".repeat(right)
+        ans.add(s)
+        return
+    }
+    if (left < right) {
+        generateParenthesis_dfs(now + ")", left, right - 1, ans)
+    }
+    generateParenthesis_dfs(now + "(", left - 1, right, ans)
+}
+
+fun generateParenthesis(n: Int): List<String> {
+    val ans = mutableListOf<String>()
+    generateParenthesis_dfs("", n, n, ans)
+    return ans
+}
+
+// 207. 课程表
+fun canFinish(numCourses: Int, prerequisites: Array<IntArray>): Boolean {
+    val adjs = Array<MutableList<Int>>(numCourses) { mutableListOf() }
+    val queue = ArrayDeque<Int>()
+    val courses = IntArray(numCourses) { 0 }
+    var cnt = 0
+    for (require in prerequisites) {
+        adjs[require[1]].add(require[0])
+        courses[require[0]]++
+    }
+    for (id in courses.indices) {
+        if (courses[id] == 0) {
+            queue.addLast(id)
+            cnt++
+        }
+    }
+    while (queue.isNotEmpty()) {
+        for (nextCourse in adjs[queue.removeFirst()]) {
+            courses[nextCourse]--
+            if (courses[nextCourse] == 0) {
+                queue.addLast(nextCourse)
+                cnt++
+            }
+        }
+    }
+    return cnt == numCourses
+}
+
+// 210. 课程表 II
+fun findOrder(numCourses: Int, prerequisites: Array<IntArray>): IntArray {
+    val adjs = Array<MutableList<Int>>(numCourses) { mutableListOf() }
+    val queue = ArrayDeque<Int>()
+    val courses = IntArray(numCourses) { 0 }
+    val ans = mutableListOf<Int>()
+    var cnt = 0
+    for (require in prerequisites) {
+        adjs[require[1]].add(require[0])
+        courses[require[0]]++
+    }
+    for (id in courses.indices) {
+        if (courses[id] == 0) {
+            queue.addLast(id)
+            ans.add(id)
+            cnt++
+        }
+    }
+    while (queue.isNotEmpty()) {
+        for (nextCourse in adjs[queue.removeFirst()]) {
+            courses[nextCourse]--
+            if (courses[nextCourse] == 0) {
+                queue.addLast(nextCourse)
+                ans.add(nextCourse)
+                cnt++
+            }
+        }
+    }
+    return if (cnt != numCourses) intArrayOf() else ans.toIntArray()
+}
+
+// 662. 二叉树最大宽度
+fun widthOfBinaryTree(root: TreeNode?): Int {
+    if (root == null) return 0
+    val queue = ArrayDeque<Pair<TreeNode, Int>>()
+    queue.addLast(Pair(root, 1))
+    var ans = 1
+    while (queue.isNotEmpty()) {
+        val leftIdx = queue.first().second
+        val size = queue.size
+        repeat(size) {
+            val pair = queue.removeFirst()
+            pair.first.left?.let { queue.addLast(Pair(it, pair.second * 2)) }
+            pair.first.right?.let { queue.addLast(Pair(it, pair.second * 2 + 1)) }
+            if (it == size - 1) {
+                val rightIdx = pair.second
+                ans = Math.max(rightIdx - leftIdx + 1, ans)
+            }
+        }
+    }
+    return ans
+}
