@@ -825,3 +825,188 @@ fun widthOfBinaryTree(root: TreeNode?): Int {
     }
     return ans
 }
+
+// 6. Z 字形变换
+fun convert(s: String, numRows: Int): String {
+    if (numRows == 1) return s
+    val group = s.length / (2 * numRows - 2) + if (s.length % (2 * numRows - 2) == 0) 0 else 1
+    val groupLen = numRows - 1
+    val array2d = Array(numRows) { CharArray(group * groupLen) { ' ' } }
+    var idxStr = 0
+    for (groupIdx in 0 until group) {
+        val startColIdx = groupIdx * groupLen
+        for (i in 0 until numRows) {
+            array2d[i][startColIdx] = s[idxStr]
+            idxStr++
+            if (idxStr >= s.length) break
+        }
+        if (idxStr >= s.length) break
+        var colIdx = startColIdx + 1
+        for (i in numRows - 2 downTo 1) {
+            array2d[i][colIdx] = s[idxStr]
+            idxStr++
+            colIdx++
+            if (idxStr >= s.length) break
+        }
+        if (idxStr >= s.length) break
+    }
+    val ans = CharArray(s.length) { ' ' }
+    idxStr = 0
+    for (i in array2d.indices) {
+        for (j in array2d[i].indices) {
+            if (array2d[i][j] == ' ') continue
+            ans[idxStr] = array2d[i][j]
+            idxStr++
+        }
+    }
+    return ans.joinToString("")
+}
+
+// 199. 二叉树的右视图
+fun rightSideView(root: TreeNode?): List<Int> {
+    if (root == null) return emptyList()
+    val queue = ArrayDeque<TreeNode>()
+    val ans = mutableListOf<Int>()
+    queue.addLast(root)
+    while (queue.isNotEmpty()) {
+        val size = queue.size
+        repeat(size) { idx ->
+            val node = queue.removeFirst()
+            node.left?.let { queue.addLast(it) }
+            node.right?.let { queue.addLast(it) }
+            if (idx == size - 1) {
+                ans.add(node.`val`)
+            }
+        }
+    }
+    return ans
+}
+
+// 103. 二叉树的锯齿形层序遍历
+fun zigzagLevelOrder(root: TreeNode?): List<List<Int>> {
+    if (root == null) return emptyList()
+    val ans = mutableListOf<MutableList<Int>>()
+    val queue = ArrayDeque<TreeNode>()
+    var leftFirst = true
+    queue.addLast(root)
+    while (queue.isNotEmpty()) {
+        val stack = ArrayDeque<TreeNode>()
+        val subAns = mutableListOf<Int>()
+        repeat(queue.size) {
+            val node = queue.removeFirst()
+            subAns.add(node.`val`)
+            if (leftFirst) {
+                node.left?.let { stack.addLast(it) }
+                node.right?.let { stack.addLast(it) }
+            } else {
+                node.right?.let { stack.addLast(it) }
+                node.left?.let { stack.addLast(it) }
+            }
+        }
+        ans.add(subAns)
+        while (stack.isNotEmpty()) {
+            queue.addLast(stack.removeLast())
+        }
+        leftFirst = !leftFirst
+    }
+    return ans
+}
+
+// 剑指 Offer 47. 礼物的最大价值
+fun maxValue(grid: Array<IntArray>): Int {
+    val row = grid.size
+    val col = grid[0].size
+    val dp = Array(row) { IntArray(col) { 0 } }
+    dp[0][0] = grid[0][0]
+    for (i in 1 until row) {
+        dp[i][0] = dp[i - 1][0] + grid[i][0]
+    }
+    for (i in 1 until col) {
+        dp[0][i] = dp[0][i - 1] + grid[0][i]
+    }
+    for (i in 1 until row) {
+        for (j in 1 until col) {
+            dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]) + grid[i][j]
+        }
+    }
+    return dp[row - 1][col - 1]
+}
+
+// 695. 岛屿的最大面积
+var maxAreaOfIsland_ans = 0
+fun maxAreaOfIsland_dfs(grid: Array<IntArray>, nowCord: IntArray): Int {
+    val nexts = arrayOf(intArrayOf(1, 0), intArrayOf(0, 1), intArrayOf(-1, 0), intArrayOf(0, -1))
+    var ans = 1
+    for (next in nexts) {
+        val nextCord = intArrayOf(nowCord[0] + next[0], nowCord[1] + next[1])
+        if (nextCord[0] >= 0 && nextCord[1] >= 0 && nextCord[0] < grid.size && nextCord[1] < grid[0].size && grid[nextCord[0]][nextCord[1]] == 1) {
+            grid[nextCord[0]][nextCord[1]] = 0
+            ans += maxAreaOfIsland_dfs(grid, nextCord)
+        }
+    }
+    return ans
+}
+
+fun maxAreaOfIsland(grid: Array<IntArray>): Int {
+    for (i in grid.indices) {
+        for (j in grid[i].indices) {
+            if (grid[i][j] == 1) {
+                grid[i][j] = 0
+                maxAreaOfIsland_ans = Math.max(maxAreaOfIsland_ans, maxAreaOfIsland_dfs(grid, intArrayOf(i, j)))
+            }
+        }
+    }
+    return maxAreaOfIsland_ans
+}
+
+// 54. 螺旋矩阵
+fun spiralOrder(matrix: Array<IntArray>): List<Int> {
+    var top = 0
+    var bottom = matrix.size - 1
+    var left = 0
+    var right = matrix[0].size - 1
+    val ans = mutableListOf<Int>()
+    var dir = 0
+    while (top <= bottom && left <= right) {
+        when (dir % 4) {
+            0 -> {
+                for (col in left..right) ans.add(matrix[top][col])
+                top++
+            }
+            1 -> {
+                for (row in top..bottom) ans.add(matrix[row][right])
+                right--
+            }
+            2 -> {
+                for (col in right downTo left) ans.add(matrix[bottom][col])
+                bottom--
+            }
+            3 -> {
+                for (row in bottom downTo top) ans.add(matrix[row][left])
+                left++
+            }
+        }
+        dir++
+    }
+    return ans
+}
+
+// 151. 翻转字符串里的单词
+fun reverseWords(s: String): String {
+    val s = buildString {
+        var left = s.length - 1
+        var right = s.length - 1
+        while (left >= -1) {
+            val digit = if (left == -1) ' ' else s[left]
+            val lastDigit = if (left == s.length - 1) s[s.length - 1] else ' '
+            if (digit != ' ' && lastDigit == ' ') {
+                right = left
+            } else if (digit == ' ' && lastDigit != ' ') {
+                append(s.substring(left - 1..right))
+                append(" ")
+            }
+            left--
+        }
+    }
+    return s.substring(0 until s.length - 1)
+}
