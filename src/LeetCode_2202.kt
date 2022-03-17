@@ -1888,3 +1888,171 @@ fun threeSum(nums: IntArray): List<List<Int>> {
     }
     return ans
 }
+
+// 146. LRU 缓存
+class LRUCache(val capacity: Int) {
+    class Node(val key: Int, var `val`: Int, var next: Node? = null, var pre: Node? = null)
+
+    private val map = mutableMapOf<Int, Node>()
+    private val fakeHead = Node(-1, -1)
+    private var fakeTail = Node(-1, -1)
+
+    init {
+        fakeHead.next = fakeTail
+        fakeTail.pre = fakeHead
+    }
+
+    fun get(key: Int): Int {
+        val node = map[key] ?: return -1
+        moveToTail(node)
+        return node.`val`
+    }
+
+    private fun moveToTail(node: Node) {
+        removeNode(node)
+        addToTail(node)
+    }
+
+    private fun removeNode(node: Node) {
+        node.pre!!.next = node.next
+        node.next!!.pre = node.pre
+    }
+
+    private fun removeHead(): Node {
+        val nodeToRemove = fakeHead.next!!
+        removeNode(nodeToRemove)
+        return nodeToRemove
+    }
+
+    private fun addToTail(node: Node) {
+        val pre: Node = fakeTail.pre!!
+        pre.next = node
+        fakeTail.pre = node
+        node.pre = pre
+        node.next = fakeTail
+    }
+
+    fun put(key: Int, value: Int) {
+        val oldValue = get(key)
+        if (oldValue == -1) { // 原来不存在
+            val node = Node(key, value)
+            map[key] = node
+            addToTail(node)
+            if (map.size > capacity) {
+                val nodeToRemove = removeHead()
+                map.remove(nodeToRemove.key)
+            }
+        } else if (oldValue != value) { // 已经存在，更新旧值
+            map[key]!!.`val` = value
+        }
+    }
+}
+
+// 287. 寻找重复数
+fun findDuplicate(nums: IntArray): Int {
+    val sortedNums = nums.sorted()
+    var left = 0
+    var right = sortedNums.size - 1
+    while (left <= right) {
+        val midIdx = (left + right) / 2
+        val midNum = sortedNums[midIdx]
+        if (midIdx >= midNum) {
+            right = midIdx - 1
+        } else {
+            left = midIdx + 1
+        }
+    }
+    return left
+}
+
+// 101. 对称二叉树
+fun isSymmetric_dfs(node1: TreeNode?, node2: TreeNode?): Boolean {
+    if (node1 == null && node2 == null) return true
+    if (node1 == null || node2 == null) return false
+    if (node1.`val` != node2.`val`) return false
+    return isSymmetric_dfs(node1.left, node2.right) && isSymmetric_dfs(node1.right, node2.left)
+}
+
+fun isSymmetric(root: TreeNode?): Boolean {
+    if (root == null) return true
+    return isSymmetric_dfs(root.left, root.right)
+}
+
+// 剑指 Offer 26. 树的子结构
+fun isSubStructure_dfs(A: TreeNode?, B: TreeNode?, BHead: TreeNode): Boolean {
+    if (B == null) return true
+    if (A == null) return false
+    return if (A.`val` == B.`val`) {
+        (isSubStructure_dfs(A.left, B.left, BHead) && isSubStructure_dfs(A.right, B.right, BHead))
+                || (isSubStructure_dfs(A.left, BHead, BHead) || isSubStructure_dfs(A.right, BHead, BHead))
+    } else {
+        (isSubStructure_dfs(A.left, BHead, BHead) || isSubStructure_dfs(A.right, BHead, BHead))
+    }
+}
+
+fun isSubStructure(A: TreeNode?, B: TreeNode?): Boolean {
+    if (B == null) return false
+    return isSubStructure_dfs(A, B, B)
+}
+
+// 179. 最大数
+fun largestNumber(nums: IntArray): String {
+    val comparator = Comparator { s1: String, s2: String ->
+        (s1 + s2).compareTo(s2 + s1)
+    }
+    val q = PriorityQueue(comparator)
+    nums.forEach { q.add(it.toString()) }
+    return buildString {
+        while (q.isNotEmpty()) append(q.remove())
+    }
+}
+
+// 31. 下一个排列
+fun nextPermutation(nums: IntArray): Unit {
+    var lastMinorIdx = 0
+    for (idx in nums.size - 2 downTo 0) {
+        if (nums[idx] < nums[idx + 1]) {
+            lastMinorIdx = idx
+            break
+        }
+    }
+    if (lastMinorIdx != 0) {
+        var firstMajorIdx = nums.size - 1
+        for (idx in lastMinorIdx + 1 until nums.size) {
+            if (nums[idx] <= nums[lastMinorIdx]) {
+                firstMajorIdx = idx - 1
+                break
+            }
+        }
+        // swap
+        findKthLargest_swap(nums, firstMajorIdx, lastMinorIdx)
+    }
+
+    // reverse
+    var toReversedHead = if (lastMinorIdx != 0) lastMinorIdx + 1 else 0
+    var toReversedTail = nums.size - 1
+    while (toReversedHead < toReversedTail) {
+        findKthLargest_swap(nums, toReversedHead, toReversedTail)
+        toReversedHead++
+        toReversedTail--
+    }
+}
+
+// 670. 最大交换
+fun maximumSwap(num: Int): Int {
+    val s = num.toString().toCharArray()
+    // i 右侧最后一个最大的数的位置
+    val maxRightDigitIdx = IntArray(s.size) { it }
+    for (i in s.size - 2 downTo 0) {
+        if (s[i] <= s[maxRightDigitIdx[i + 1]]) {
+            maxRightDigitIdx[i] = maxRightDigitIdx[i + 1]
+        }
+    }
+    for (i in s.indices) {
+        if (s[i] != s[maxRightDigitIdx[i]]) {
+            permutation_swap(s, i, maxRightDigitIdx[i])
+            return s.joinToString("").toInt()
+        }
+    }
+    return num
+}
