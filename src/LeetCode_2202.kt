@@ -1010,3 +1010,221 @@ fun reverseWords(s: String): String {
     }
     return s.substring(0 until s.length - 1)
 }
+
+// 3. 无重复字符的最长子串
+fun lengthOfLongestSubstring(s: String): Int {
+    var left = 0
+    var right = 0
+    var ans = 0
+    val set = mutableSetOf<Char>()
+    while (right < s.length) {
+        val rightChar = s[right]
+        if (set.contains(rightChar)) {
+            while (s[left] != rightChar) {
+                set.remove(s[left])
+                left++
+            }
+            left++
+            right++
+
+        } else {
+            set.add(rightChar)
+            ans = max(ans, right - left + 1)
+            right++
+        }
+    }
+    return ans
+}
+
+// 56. 合并区间
+fun merge(intervals: Array<IntArray>): Array<IntArray> {
+    val sortedIntervals = intervals.sortedBy { it[0] }
+    val ans = mutableListOf<IntArray>()
+    ans.add(sortedIntervals[0])
+    for (interval in sortedIntervals) {
+        val start = interval[0]
+        val end = interval[1]
+        if (start > ans.last()[1]) {
+            ans.add(interval)
+        } else {
+            val lastInterval = ans.removeLast()
+            lastInterval[1] = Math.max(lastInterval[1], end)
+            ans.add(lastInterval)
+        }
+    }
+    return ans.toTypedArray()
+}
+
+// 105. 从前序与中序遍历序列构造二叉树
+fun buildTree(preorder: IntArray, inorder: IntArray): TreeNode? {
+    if (preorder.isEmpty() && inorder.isEmpty()) return null
+    val rootVal = preorder[0]
+    val root = TreeNode(rootVal)
+    for (i in inorder.indices) {
+        if (inorder[i] == rootVal) {
+            root.left = buildTree(preorder.sliceArray(1 until i + 1), inorder.sliceArray(0 until i))
+            root.right =
+                buildTree(preorder.sliceArray(i + 1 until preorder.size), inorder.sliceArray(i + 1 until inorder.size))
+        }
+    }
+    return root
+}
+
+// 53. 最大子数组和
+fun maxSubArray(nums: IntArray): Int {
+    val dp = IntArray(nums.size) { nums[it] }
+    var ans = dp[0]
+    for (idx in 1 until dp.size) {
+        dp[idx] = Math.max(dp[idx], dp[idx] + dp[idx - 1])
+        ans = Math.max(dp[idx], ans)
+    }
+    return ans
+}
+
+// 112. 路径总和
+fun hasPathSum_dfs(root: TreeNode, targetSum: Int, nowSum: Int): Boolean {
+    if (root.left == null && root.right == null) {
+        if (nowSum + root.`val` == targetSum) return true
+        return false
+    }
+    var ret = false
+    root.left?.let {
+        ret = ret || hasPathSum_dfs(it, targetSum, nowSum + root.`val`)
+    }
+    root.right?.let {
+        ret = ret || hasPathSum_dfs(it, targetSum, nowSum + root.`val`)
+    }
+    return ret
+}
+
+fun hasPathSum(root: TreeNode?, targetSum: Int): Boolean {
+    if (root == null) return false
+    return hasPathSum_dfs(root, targetSum, 0)
+}
+
+// 113. 路径总和 II
+fun pathSum_dfs(root: TreeNode, targetSum: Int, nowSum: Int, nowPath: MutableList<Int>, ans: MutableList<List<Int>>) {
+    if (root.left == null && root.right == null) {
+        if (nowSum + root.`val` == targetSum) {
+            nowPath.add(root.`val`)
+            ans.add(nowPath.toList())
+            nowPath.removeAt(nowPath.size - 1)
+        }
+        return
+    }
+
+    root.left?.let {
+        nowPath.add(root.`val`)
+        pathSum_dfs(it, targetSum, nowSum + root.`val`, nowPath, ans)
+        nowPath.removeAt(nowPath.size - 1)
+    }
+    root.right?.let {
+        nowPath.add(root.`val`)
+        pathSum_dfs(it, targetSum, nowSum + root.`val`, nowPath, ans)
+        nowPath.removeAt(nowPath.size - 1)
+    }
+}
+
+fun pathSum(root: TreeNode?, targetSum: Int): List<List<Int>> {
+    if (root == null) return emptyList()
+    val ans = mutableListOf<List<Int>>()
+    val nowPath = mutableListOf<Int>()
+    pathSum_dfs(root, targetSum, 0, nowPath, ans)
+    return ans
+}
+
+// 79. 单词搜索
+fun exist_dfs(board: Array<CharArray>, vis: Array<BooleanArray>, nowIdx: IntArray, word: String, wordIdx: Int): Boolean {
+    if (wordIdx == word.length) return true
+    val nextSteps = arrayOf(intArrayOf(0,1), intArrayOf(0,-1), intArrayOf(1,0), intArrayOf(-1,0))
+    for (nextStep in nextSteps) {
+        val nextIdx = intArrayOf(nowIdx[0] + nextStep[0], nowIdx[1] + nextStep[1])
+        if (nextIdx[0] >= 0 && nextIdx[1] >= 0 && nextIdx[0] < board.size && nextIdx[1] < board[0].size && board[nextIdx[0]][nextIdx[1]] == word[wordIdx] && !vis[nextIdx[0]][nextIdx[1]]) {
+            vis[nextIdx[0]][nextIdx[1]] = true
+            val ret = exist_dfs(board, vis, nextIdx, word, wordIdx + 1)
+            vis[nextIdx[0]][nextIdx[1]] = false
+            if (ret) return true
+        }
+    }
+    return false
+}
+fun exist(board: Array<CharArray>, word: String): Boolean {
+    for (i in board.indices) {
+        for (j in board[i].indices) {
+            if (board[i][j] == word[0]) {
+                val vis = Array(board.size) { BooleanArray(board[0].size) { false }}
+                vis[i][j] = true
+                val ret = exist_dfs(board, vis, intArrayOf(i, j), word, 1)
+                if (ret) return true
+            }
+        }
+    }
+    return false
+}
+
+// 124. 二叉树中的最大路径和
+var maxPathSum_sum: Long = Int.MIN_VALUE.toLong()
+fun maxPathSum_dfs(root: TreeNode?): Long {
+    if (root == null) return Int.MIN_VALUE.toLong()
+    var ret = root.`val`.toLong()
+
+    val leftVal = maxPathSum_dfs(root.left)
+    ret = Math.max(ret, root.`val` + leftVal)
+    maxPathSum_sum = Math.max(leftVal, maxPathSum_sum)
+    val rightVal = maxPathSum_dfs(root.right)
+    ret = Math.max(ret, root.`val` + rightVal)
+    maxPathSum_sum = Math.max(leftVal, maxPathSum_sum)
+    maxPathSum_sum = Math.max(rightVal, maxPathSum_sum)
+    maxPathSum_sum = Math.max((leftVal + rightVal + root.`val`), maxPathSum_sum)
+    return ret
+}
+
+fun maxPathSum(root: TreeNode?): Int {
+    val sum = maxPathSum_dfs(root)
+    return Math.max(sum, maxPathSum_sum).toInt()
+}
+
+// 347. 前 K 个高频元素
+fun topKFrequent_qSort(nums: IntArray, left: Int, right: Int, map: MutableMap<Int, Int>): Int {
+    findKthLargest_swap(nums, left, (left..right).random())
+    val chosen = map[nums[left]]!!
+    var pos = left
+    for (idx in left + 1..right) {
+        if (chosen > map[nums[idx]]!!) {
+            pos++
+            findKthLargest_swap(nums, pos, idx)
+        }
+    }
+    findKthLargest_swap(nums, left, pos)
+    return pos
+}
+
+fun topKFrequent(nums: IntArray, k: Int): IntArray {
+    val cntMap = mutableMapOf<Int, Int>()
+    for (num in nums) {
+        cntMap[num] = cntMap.getOrDefault(num, 0) + 1
+    }
+
+    val realNums = IntArray(cntMap.size)
+    for ((idx, key) in cntMap.keys.withIndex()) {
+        realNums[idx] = key
+    }
+    val realK = realNums.size - k
+    var left = 0
+    var right = realNums.size - 1
+    while (left <= right) {
+        val mid = topKFrequent_qSort(realNums, left, right, cntMap)
+        if (mid == realK) {
+            break
+        } else if (realK > mid) {
+            left = mid + 1
+        } else {
+            right = mid - 1
+        }
+    }
+    val ans = mutableListOf<Int>()
+    for (idx in realK until realNums.size) {
+        ans.add(realNums[idx])
+    }
+    return ans.toIntArray()
+}
