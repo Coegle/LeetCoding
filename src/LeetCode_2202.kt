@@ -1697,3 +1697,194 @@ fun change(amount: Int, coins: IntArray): Int {
     }
     return dp[amount]
 }
+
+// 139. 单词拆分
+fun wordBreak(s: String, wordDict: List<String>): Boolean {
+    val set = mutableSetOf<String>()
+    for (word in wordDict) {
+        set.add(word)
+    }
+    val dp = BooleanArray(s.length + 1)
+    dp[0] = true
+    for (i in 1..s.length) {
+        for (j in 1..i) {
+            val subStr = s.substring(j - 1 until i)
+            dp[i] = dp[j - 1] && set.contains(subStr)
+            if (dp[i]) break
+        }
+    }
+    return dp[s.length]
+}
+
+// 122. 买卖股票的最佳时机 II
+fun maxProfit(prices: IntArray): Int {
+    val dp = Array(prices.size) { IntArray(2) { 0 } }
+    dp[0][1] = -prices[0]
+    for (i in 1 until prices.size) {
+        dp[i][0] = Math.max(dp[i - 1][0], dp[i - 1][1] + prices[i])
+        dp[i][1] = Math.max(dp[i - 1][1], dp[i - 1][0] - prices[i])
+    }
+    return dp[prices.size - 1][0]
+}
+
+// 221. 最大正方形
+fun maximalSquare(matrix: Array<CharArray>): Int {
+    val rowNum = matrix.size
+    val colNum = matrix[0].size
+    var ans = 0
+    val dp = MutableList(rowNum) { x ->
+        MutableList(colNum) { y ->
+            if ((x == 0 || y == 0) && matrix[x][y] == '1') {
+                ans = 1
+                1
+            } else 0
+        }
+    }
+
+    for (i in 1 until rowNum) {
+        for (j in 1 until colNum) {
+            if (matrix[i][j] == '1') {
+                dp[i][j] = Math.min(Math.min(dp[i - 1][j], dp[i - 1][j - 1]), dp[i][j - 1]) + 1
+                ans = Math.max(ans, dp[i][j])
+            }
+        }
+    }
+    return ans * ans
+}
+
+// 131. 分割回文串
+fun partition_init(s: String): Array<BooleanArray> {
+    val dp = Array(s.length) { BooleanArray(s.length) { true } }
+    for (i in dp.size - 2 downTo 0) {
+        for (j in i + 1 until dp.size) {
+            dp[i][j] = dp[i + 1][j - 1] && s[i] == s[j]
+        }
+    }
+    return dp
+}
+
+fun partition_dfs(
+    table: Array<BooleanArray>,
+    s: String,
+    nextIdx: Int,
+    nowState: MutableList<String>,
+    ans: MutableList<List<String>>
+) {
+    if (nextIdx == s.length) {
+        ans.add(nowState.toList())
+        return
+    }
+    for (tail in nextIdx until s.length) {
+        val subStr = s.substring(nextIdx..tail)
+        if (table[nextIdx][tail]) {
+            nowState.add(subStr)
+            partition_dfs(table, s, tail + 1, nowState, ans)
+            nowState.removeAt(nowState.size - 1)
+        }
+    }
+}
+
+fun partition(s: String): List<List<String>> {
+    val table = partition_init(s)
+    val ans = mutableListOf<List<String>>()
+    partition_dfs(table, s, 0, mutableListOf(), ans)
+    return ans
+}
+
+// 47. 全排列 II
+fun permuteUnique_dfs(nums: IntArray, startIdx: Int, ans: MutableList<List<Int>>) {
+    if (startIdx >= nums.size) {
+        ans.add(nums.toList())
+        return
+    }
+    val haveSwapedNums = mutableSetOf<Int>()
+    for (idx in startIdx until nums.size) {
+        if (haveSwapedNums.contains(nums[idx])) continue
+        haveSwapedNums.add(nums[idx])
+        findKthLargest_swap(nums, startIdx, idx)
+        permuteUnique_dfs(nums, startIdx + 1, ans)
+        findKthLargest_swap(nums, startIdx, idx)
+    }
+}
+
+fun permuteUnique(nums: IntArray): List<List<Int>> {
+    val ans = mutableListOf<List<Int>>()
+    permuteUnique_dfs(nums, 0, ans)
+    return ans
+}
+
+// 43. 字符串相乘
+fun add(num1: String, num2: String): String {
+    return buildString {
+        var idx1 = num1.length - 1
+        var idx2 = num2.length - 1
+        var add = 0
+        while (idx1 >= 0 || idx2 >= 0 || add != 0) {
+            val digit1 = if (idx1 >= 0) num1[idx1] - '0' else 0
+            val digit2 = if (idx2 >= 0) num2[idx2] - '0' else 0
+            val res = digit1 + digit2 + add
+            append('0' + res % 10)
+            add = res / 10
+            idx1--
+            idx2--
+        }
+    }.reversed()
+}
+
+fun multiplyDigit(num: String, digit: Int): String {
+    return if (digit == 0) "0" else
+        buildString {
+            var add = 0
+            var idx = num.length - 1
+            while (add != 0 || idx >= 0) {
+                val d = num[idx] - '0'
+                val res = d * digit + add
+                add = res / 10
+                append('0' + res % 10)
+                idx--
+            }
+        }.reversed()
+}
+
+fun multiply(num1: String, num2: String): String {
+    var ans = "0"
+    repeat(num2.length) { time ->
+        val digit = num2[num2.length - time - 1] - '0'
+        val subAns = buildString {
+            append(multiplyDigit(num1, digit))
+            append("0".repeat(time))
+        }
+        ans = add(ans, subAns)
+    }
+    return ans
+}
+
+// 15. 三数之和
+fun threeSum(nums: IntArray): List<List<Int>> {
+    val sortedNums = nums.sorted()
+    val ans = mutableListOf<List<Int>>()
+    for (first in 0 until sortedNums.size - 2) {
+        if (first != 0 && sortedNums[first] == sortedNums[first - 1]) continue
+        var second = first + 1
+        var third = sortedNums.size - 1
+        while (second < third) {
+            if (second != first + 1 && sortedNums[second] == sortedNums[second - 1]) {
+                second++
+                continue
+            }
+            // 还可以对 third 添加一个 if 去重，可以加快速度（对 first 和 second 去重已经实现了对答案的去重）
+            val sum = sortedNums[first] + sortedNums[second] + sortedNums[third]
+            if (sum == 0) {
+                val list = listOf(sortedNums[first], sortedNums[second], sortedNums[third])
+                ans.add(list)
+                second++
+                third--
+            } else if (sum > 0) {
+                third--
+            } else {
+                second++
+            }
+        }
+    }
+    return ans
+}
