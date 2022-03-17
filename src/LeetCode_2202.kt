@@ -1482,3 +1482,218 @@ fun reorderList(head: ListNode?) {
         node = next
     }
 }
+
+// 143. 重排链表
+fun toMiddle(head: ListNode): ListNode {
+    var slowP: ListNode = head
+    var fastP: ListNode? = head
+    var pre = head
+    while (fastP != null && fastP.next != null) {
+        pre = slowP
+        slowP = slowP.next!!
+        fastP = fastP.next!!.next
+    }
+    if (fastP == null) {
+        pre.next = null
+        return slowP
+    }
+    pre = slowP
+    slowP = slowP.next!!
+    pre.next = null
+    return slowP
+}
+
+fun reverseList1(head: ListNode): ListNode {
+    var reversedHead: ListNode = head
+    var node = head.next
+    head.next = null
+    while (node != null) {
+        val nextNode = node.next
+        node.next = reversedHead
+        reversedHead = node
+        node = nextNode
+    }
+    return reversedHead
+}
+
+fun reorderListSolution1(head: ListNode?): Unit {
+    if (head?.next == null) return
+    var node1: ListNode? = head
+    var node2: ListNode? = reverseList1(toMiddle(head))
+    while (node1 != null && node2 != null) {
+        val node1Next = node1.next
+        val node2Next = node2.next
+        node1.next = node2
+        node2.next = node1Next
+        node1 = node1Next
+        node2 = node2Next
+    }
+}
+
+// 21. 合并两个有序链表
+fun mergeTwoLists(list1: ListNode?, list2: ListNode?): ListNode? {
+    val fakeNode = ListNode(-1)
+    var mergedNodeTail = fakeNode
+    var node1 = list1
+    var node2 = list2
+    while (node1 != null && node2 != null) {
+        if (node1.`val` > node2.`val`) {
+            mergedNodeTail.next = node2
+            node2 = node2.next
+        } else {
+            mergedNodeTail.next = node1
+            node1 = node1.next
+        }
+        mergedNodeTail = mergedNodeTail.next!!
+    }
+    mergedNodeTail.next = node1 ?: node2
+    return fakeNode.next
+}
+
+// 148. 排序链表
+fun sortList(head: ListNode?): ListNode? {
+    if (head?.next == null) return head
+    var slow: ListNode = head
+    var fast = head
+    var pre = head
+    while (fast?.next != null) {
+        pre = slow
+        slow = slow.next!!
+        fast = fast.next!!.next
+    }
+    val head2 = slow
+    pre!!.next = null
+    val l1 = sortList(head)
+    val l2 = sortList(head2)
+    return mergeTwoLists(l1, l2)
+}
+
+// 160. 相交链表
+fun getIntersectionNode(headA: ListNode?, headB: ListNode?): ListNode? {
+    val fakeHeadA = ListNode(-1)
+    fakeHeadA.next = headA
+    var lenA = 0
+    var nodeA = fakeHeadA
+
+    val fakeHeadB = ListNode(-1)
+    fakeHeadB.next = headB
+    var lenB = 0
+    var nodeB = fakeHeadB
+
+    while (nodeA.next != null || nodeB.next != null) {
+        nodeA.next?.let {
+            lenA++
+            nodeA = it
+        }
+        nodeB.next?.let {
+            lenB++
+            nodeB = it
+        }
+    }
+    if (nodeA != nodeB) return null
+
+    nodeA = fakeHeadA
+    nodeB = fakeHeadB
+    while (lenA != lenB) {
+        if (lenA > lenB) {
+            lenA--
+            nodeA = nodeA.next!!
+        } else {
+            lenB--
+            nodeB = nodeB.next!!
+        }
+    }
+    while (lenA != 0) {
+        nodeA = nodeA.next!!
+        nodeB = nodeB.next!!
+        lenA--
+        if (nodeA == nodeB) return nodeA
+    }
+    return null
+}
+
+// 5. 最长回文子串
+fun longestPalindrome(s: String): String {
+    var ans = ""
+    val charArray = CharArray(s.length * 2 - 1) { '#' }
+    for (idx in s.indices) {
+        charArray[idx * 2] = s[idx]
+    }
+    for (centerIdx in charArray.indices) {
+        val maxR = Math.min(centerIdx, charArray.size - centerIdx - 1)
+        for (r in 0..maxR) {
+            if (charArray[centerIdx - r] == charArray[centerIdx + r]) {
+                if ((if (charArray[centerIdx] == '#') (r + 1) / 2 * 2 else r / 2 * 2 + 1) > ans.length) {
+                    ans = charArray.sliceArray(centerIdx - r..centerIdx + r).filter { it != '#' }.joinToString("")
+                }
+            } else break
+        }
+    }
+    return ans
+}
+
+// 283. 移动零
+fun moveZeroes(nums: IntArray): Unit {
+    var zeroIdx = 0
+    while (zeroIdx < nums.size && nums[zeroIdx] != 0) {
+        zeroIdx++
+    }
+    var rightIdx = zeroIdx + 1
+    while (rightIdx < nums.size) {
+        if (nums[rightIdx] != 0) {
+            findKthLargest_swap(nums, zeroIdx, rightIdx)
+            zeroIdx++
+        }
+        rightIdx++
+    }
+}
+
+// 16. 最接近的三数之和
+fun threeSumClosest(nums: IntArray, target: Int): Int {
+    nums.sort()
+    var ans = nums[0] + nums[1] + nums[2]
+    for (i in nums.indices) {
+        if (i != 0 && nums[i] == nums[i - 1]) continue
+        val num1 = nums[i]
+        var left = i + 1
+        var right = nums.size - 1
+        while (left < right) {
+            val sum = num1 + nums[left] + nums[right]
+            if (sum == target) return target
+            else if (sum > target) {
+                right--
+            } else {
+                left++
+            }
+            if (Math.abs(target - ans) > Math.abs(sum - target)) ans = sum
+        }
+    }
+    return ans
+}
+
+// 322. 零钱兑换
+fun coinChange(coins: IntArray, amount: Int): Int {
+    val dp = IntArray(amount + 1) { Int.MAX_VALUE }
+    dp[0] = 0
+    for (i in dp.indices) {
+        for (coin in coins) {
+            val preAmount = i - coin
+            if (preAmount >= 0 && dp[preAmount] != Int.MAX_VALUE) {
+                dp[i] = Math.min(dp[i], dp[preAmount] + 1)
+            }
+        }
+    }
+    return if (dp[amount] == Int.MAX_VALUE) -1 else dp[amount]
+}
+
+// 518. 零钱兑换 II
+fun change(amount: Int, coins: IntArray): Int {
+    val dp = IntArray(amount + 1) { 0 }
+    dp[0] = 1
+    for (coin in coins) {
+        for (i in coin until dp.size) {
+            dp[i] = dp[i] + dp[i - coin]
+        }
+    }
+    return dp[amount]
+}
