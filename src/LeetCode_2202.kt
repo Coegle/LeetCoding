@@ -1134,9 +1134,15 @@ fun pathSum(root: TreeNode?, targetSum: Int): List<List<Int>> {
 }
 
 // 79. 单词搜索
-fun exist_dfs(board: Array<CharArray>, vis: Array<BooleanArray>, nowIdx: IntArray, word: String, wordIdx: Int): Boolean {
+fun exist_dfs(
+    board: Array<CharArray>,
+    vis: Array<BooleanArray>,
+    nowIdx: IntArray,
+    word: String,
+    wordIdx: Int
+): Boolean {
     if (wordIdx == word.length) return true
-    val nextSteps = arrayOf(intArrayOf(0,1), intArrayOf(0,-1), intArrayOf(1,0), intArrayOf(-1,0))
+    val nextSteps = arrayOf(intArrayOf(0, 1), intArrayOf(0, -1), intArrayOf(1, 0), intArrayOf(-1, 0))
     for (nextStep in nextSteps) {
         val nextIdx = intArrayOf(nowIdx[0] + nextStep[0], nowIdx[1] + nextStep[1])
         if (nextIdx[0] >= 0 && nextIdx[1] >= 0 && nextIdx[0] < board.size && nextIdx[1] < board[0].size && board[nextIdx[0]][nextIdx[1]] == word[wordIdx] && !vis[nextIdx[0]][nextIdx[1]]) {
@@ -1148,11 +1154,12 @@ fun exist_dfs(board: Array<CharArray>, vis: Array<BooleanArray>, nowIdx: IntArra
     }
     return false
 }
+
 fun exist(board: Array<CharArray>, word: String): Boolean {
     for (i in board.indices) {
         for (j in board[i].indices) {
             if (board[i][j] == word[0]) {
-                val vis = Array(board.size) { BooleanArray(board[0].size) { false }}
+                val vis = Array(board.size) { BooleanArray(board[0].size) { false } }
                 vis[i][j] = true
                 val ret = exist_dfs(board, vis, intArrayOf(i, j), word, 1)
                 if (ret) return true
@@ -1227,4 +1234,251 @@ fun topKFrequent(nums: IntArray, k: Int): IntArray {
         ans.add(realNums[idx])
     }
     return ans.toIntArray()
+}
+
+// 162. 寻找峰值
+fun findPeakElement_get(nums: IntArray, idx: Int): Long {
+    if (idx in nums.indices) {
+        return nums[idx].toLong()
+    }
+    return Long.MIN_VALUE
+}
+
+fun findPeakElement(nums: IntArray): Int {
+    var left = 0
+    var right = nums.size - 1
+    while (left <= right) {
+        val mid = (left + right) / 2
+        val midVal = nums[mid]
+        if (midVal > findPeakElement_get(nums, mid - 1) && midVal > findPeakElement_get(nums, mid + 1)) {
+            return mid
+        } else if (midVal < findPeakElement_get(nums, mid + 1)) {
+            left = mid + 1
+        } else {
+            right = mid - 1
+        }
+    }
+    return -1
+}
+
+// 155. 最小栈
+class MinStack() {
+    private val stack = ArrayDeque<Int>()
+    private val minStack = ArrayDeque<Int>()
+
+    fun push(`val`: Int) {
+        stack.addLast(`val`)
+        minStack.addLast(if (minStack.isNotEmpty()) Math.min(`val`, minStack.last()) else `val`)
+    }
+
+    fun pop() {
+        stack.removeLast()
+        minStack.removeLast()
+    }
+
+    fun top(): Int {
+        return stack.last()
+    }
+
+    fun getMin(): Int {
+        return minStack.last()
+    }
+
+}
+
+// 215. 数组中的第K个最大元素
+fun findKthLargest_swap(nums: IntArray, idx1: Int, idx2: Int) {
+    val tmp = nums[idx1]
+    nums[idx1] = nums[idx2]
+    nums[idx2] = tmp
+}
+
+fun findKthLargest_sortK(nums: IntArray, left: Int, right: Int): Int {
+    findKthLargest_swap(nums, left, Random.nextInt(left..right))
+    val chosen = nums[left]
+    var pos = left
+    for (idx in left + 1..right) {
+        if (nums[idx] < chosen) {
+            pos++
+            findKthLargest_swap(nums, pos, idx)
+        }
+    }
+    findKthLargest_swap(nums, pos, left)
+    return pos
+}
+
+fun findKthLargest(nums: IntArray, k: Int): Int {
+    val target = nums.size - k
+    var left = 0
+    var right = nums.size - 1
+    var idxK = findKthLargest_sortK(nums, left, right)
+    while (idxK != target) {
+        if (idxK > target) {
+            right = idxK - 1
+        } else {
+            left = idxK + 1
+        }
+        idxK = findKthLargest_sortK(nums, left, right)
+    }
+    return nums[idxK]
+}
+
+// 206. 反转链表
+fun reverseList(head: ListNode?): ListNode? {
+    if (head == null) return null
+    var node = head.next
+    var ansHead = head
+    ansHead.next = null
+    while (node != null) {
+        val next = node.next
+        node.next = ansHead
+        ansHead = node
+        node = next
+    }
+    return ansHead
+}
+
+// 25. K 个一组翻转链表
+fun reverseKGroup(head: ListNode?, k: Int): ListNode? {
+    val reversedFakeNode = ListNode(-1)
+    var lastGroupTail = reversedFakeNode // 上一组的末尾
+    var tmpNode = head
+    while (tmpNode != null) {
+        val groupHead = tmpNode
+        repeat(k - 1) {
+            tmpNode = tmpNode!!.next
+            if (tmpNode == null) {
+                lastGroupTail.next = groupHead
+                return reversedFakeNode.next
+            }
+        }
+        val tail = tmpNode
+        tmpNode = tmpNode!!.next
+        tail!!.next = null
+        val reversedGroupHead = reverseList(groupHead)
+        lastGroupTail.next = reversedGroupHead
+        lastGroupTail = groupHead
+    }
+    return reversedFakeNode.next
+}
+
+// 82. 删除排序链表中的重复元素 II
+fun deleteDuplicates(head: ListNode?): ListNode? {
+    if (head == null) return null
+    val fakeNode = ListNode(-1)
+    var tail = fakeNode
+    var node: ListNode = head
+    var duplicated = false
+    while (node.next != null) {
+        if (node.`val` == node.next!!.`val`) {
+            duplicated = true
+            node = node.next!!
+            continue
+        }
+        if (duplicated) {
+            duplicated = false
+            node = node.next!!
+            continue
+        }
+        tail.next = node
+        tail = node
+        node = node.next!!
+    }
+    if (!duplicated) {
+        tail.next = node
+    } else {
+        tail.next = null
+    }
+    return fakeNode.next
+}
+
+// 81. 搜索旋转排序数组 II
+fun search_2(nums: IntArray, target: Int): Boolean {
+    var left = 0
+    var right = nums.size - 1
+    while (left <= right) {
+        val mid = (left + right) / 2
+        val midVal = nums[mid]
+        val leftVal = nums[left]
+        val rightVal = nums[right]
+        if (midVal == target) return true
+        if (midVal < leftVal) {
+            if (target in (midVal + 1)..rightVal) left = mid + 1
+            else right = mid - 1
+        } else if (midVal == leftVal) {
+            left += 1
+        } else {
+            if (target in leftVal until midVal) right = mid - 1
+            else left = mid + 1
+        }
+    }
+    return false
+}
+
+// 33. 搜索旋转排序数组
+fun search_1(nums: IntArray, target: Int): Int {
+    var left = 0
+    var right = nums.size - 1
+    while (left <= right) {
+        val mid = (left + right) / 2
+        val midVal = nums[mid]
+        val leftVal = nums[left]
+        val rightVal = nums[right]
+        if (midVal == target) return mid
+        else if (midVal > rightVal) {
+            if (target > midVal || target <= rightVal) left = mid + 1
+            else right = mid - 1
+        } else if (midVal < leftVal) {
+            if (target >= leftVal || target < midVal) right = mid - 1
+            else left = mid + 1
+        } else {
+            if (target > midVal) left = mid + 1
+            else right = mid - 1
+        }
+    }
+    return -1
+}
+
+fun search_1_Solution2(nums: IntArray, target: Int): Int {
+    var left = 0
+    var right = nums.size - 1
+    while (left <= right) {
+        val mid = (left + right) / 2
+        val midVal = nums[mid]
+        val leftVal = nums[left]
+        val rightVal = nums[right]
+        if (midVal == target) return mid
+        if (midVal < leftVal) {
+            if (target in (midVal + 1)..rightVal) left = mid + 1
+            else right = mid - 1
+        } else {
+            if (target in leftVal until midVal) right = mid - 1
+            else left = mid + 1
+        }
+    }
+    return -1
+}
+
+// 143. 重排链表
+fun reorderList(head: ListNode?) {
+    var node = head!!
+    val stack = ArrayDeque<ListNode>()
+
+    var tmpNode = head
+    while (tmpNode != null) {
+        stack.addLast(tmpNode)
+        tmpNode = tmpNode.next
+    }
+
+    while (node.next != null) {
+        val next = node.next!!
+        val reversedNext = stack.removeLast()
+        node.next = reversedNext
+        reversedNext.next = next
+        if (next.next == reversedNext) {
+            next.next = null
+            return
+        }
+        node = next
+    }
 }
